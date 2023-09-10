@@ -4,5 +4,7 @@ A utility that allows you to use the same mouse and keyboard on several differen
 
 
 TO-DO:
-  Common clipboard
-  Clipboard history
+  - Common clipboard
+  - Clipboard history
+  - GUI
+  - Screen arragment
