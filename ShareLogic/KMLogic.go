@@ -1,4 +1,4 @@
-package main
+package ShareLogic
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/go-vgo/robotgo"
 )
 
-func main() {
+func DisplayCoord() {
 	for {
 		x, y := robotgo.GetMousePos()
 		fmt.Println("pos: ", x, y)
