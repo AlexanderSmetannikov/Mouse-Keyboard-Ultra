@@ -25,19 +25,19 @@ type Package struct {
 	Data string
 }
 
-// Input IP - address of another PC we want to connect with
 func init() {
 	if len(os.Args) != 2 {
-		panic("len args != 2")
+		panic("Usage: ./program <IPv4>:<Port>")
 	}
 }
 
 func main() {
-	NewNode(os.Args[1]).Run(handleServer, handleClient)
+	node := NewNode(os.Args[1])
+	if node == nil {
+		panic("Invalid address format. Use IPv4:Port.")
+	}
+	node.Run(handleServer, handleClient)
 }
-
-// ipv4:port
-// 127.0.0.1:8080
 
 func NewNode(address string) *Node {
 	splited := strings.Split(address, ":")
@@ -66,11 +66,11 @@ func handleConnection(node *Node, conn net.Conn) {
 		pack    Package
 	)
 	for {
-		lenght, err := conn.Read(buffer)
+		length, err := conn.Read(buffer)
 		if err != nil {
 			break
 		}
-		message += string(buffer[:lenght])
+		message += string(buffer[:length])
 	}
 	err := json.Unmarshal([]byte(message), &pack)
 	if err != nil {
@@ -81,15 +81,17 @@ func handleConnection(node *Node, conn net.Conn) {
 }
 
 func handleServer(node *Node) {
-	listen, err := net.Listen("tcp", "0.0.0.0"+node.Address.Port)
+	listen, err := net.Listen("tcp", node.Address.Port)
 	if err != nil {
-		panic("listen error")
+		panic("Listen error: " + err.Error())
 	}
 	defer listen.Close()
+	fmt.Println("Listening on", node.Address.IPv4+node.Address.Port)
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			break
+			fmt.Println("Connection error:", err)
+			continue
 		}
 		go handleConnection(node, conn)
 	}
@@ -113,6 +115,7 @@ func handleClient(node *Node) {
 }
 
 func (node *Node) PrintNetwork() {
+	fmt.Println("Connected nodes:")
 	for addr := range node.Connections {
 		fmt.Println("|", addr)
 	}
@@ -138,6 +141,7 @@ func (node *Node) SendMessageToAll(message string) {
 func (node *Node) Send(pack *Package) {
 	conn, err := net.Dial("tcp", pack.To)
 	if err != nil {
+		fmt.Println("Dial error:", err)
 		delete(node.Connections, pack.To)
 		return
 	}
