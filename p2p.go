@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"os"
+	"p2p/ShareLogic"
+	"p2p/Utility"
 	"strings"
 )
 
@@ -21,9 +22,11 @@ type Address struct {
 }
 
 type Package struct {
-	To   string
-	From string
-	Data string
+	To        string
+	From      string
+	Data      string
+	MousePosX int
+	MousPosY  int
 }
 
 func init() {
@@ -33,24 +36,12 @@ func init() {
 }
 
 func main() {
-	// ShareLogic.DisplayCoord()
+	ShareLogic.DisplayCoord()
 	node := NewNode(os.Args[1])
 	if node == nil {
 		panic("Invalid address format. Use IPv4:Port.")
 	}
 	node.Run(handleServer, handleClient)
-}
-
-func GetLocalIp() net.IP {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
-
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-
-	return localAddr.IP
 }
 
 func NewNode(address string) *Node {
@@ -61,7 +52,7 @@ func NewNode(address string) *Node {
 	return &Node{
 		Connections: make(map[string]bool),
 		Address: Address{
-			IPv4: GetLocalIp().String(),
+			IPv4: Utility.GetLocalIp().String(),
 			Port: ":" + splited[1],
 		},
 	}

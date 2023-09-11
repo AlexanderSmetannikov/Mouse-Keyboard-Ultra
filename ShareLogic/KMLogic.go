@@ -6,6 +6,40 @@ import (
 	"github.com/go-vgo/robotgo"
 )
 
+type ComputerStat struct {
+	ResolutionX int
+	ResolutionY int
+}
+
+func GetComputerParams() *ComputerStat {
+	sx, sy := robotgo.GetScreenSize()
+	return &ComputerStat{
+		ResolutionX: sx,
+		ResolutionY: sy,
+	}
+}
+
+func sideBoundDetected(xBound int, currentX int) int {
+	if xBound-currentX < 1 {
+		return 1
+	} else if xBound-currentX == 0 {
+		return -1
+	}
+	return 0
+}
+
+func upBottomDetected(yBound int, currentY int) int {
+	return -1
+}
+
+func GetMouseCoordinat(xCoordPtr *int, yCoordPtr *int) {
+
+	x, y := robotgo.GetMousePos()
+	*xCoordPtr = x
+	*yCoordPtr = y
+
+}
+
 func DisplayCoord() {
 	for {
 		x, y := robotgo.GetMousePos()
